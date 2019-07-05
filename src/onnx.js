@@ -836,8 +836,15 @@ onnx.Tensor = class {
                     context.state = 'Tensor data is empty.';
                 }
                 break;
+            case onnx.proto.TensorProto.DataType.BOOL:
+                if (this._tensor.raw_data && this._tensor.raw_data.length > 0) {
+                    context.rawData = new DataView(this._tensor.raw_data.buffer, this._tensor.raw_data.byteOffset, this._tensor.raw_data.byteLength);
+                }
+                else {
+                    context.state = 'Tensor data is empty.';
+                }
+                break;
             default:
-                // debugger;
                 context.state = 'Tensor data type is not implemented.';
                 break;
         }
@@ -917,6 +924,11 @@ onnx.Tensor = class {
                         case onnx.proto.TensorProto.DataType.UINT64:
                             results.push(new long.Long(context.rawData.getUint32(context.index, true), context.rawData.getUint32(context.index + 4, true), true));
                             context.index += 8;
+                            context.count++;
+                            break;
+                        case onnx.proto.TensorProto.DataType.BOOL:
+                            results.push(context.rawData.getInt8(context.index, true) === 0 ? false : true);
+                            context.index += 1;
                             context.count++;
                             break;
                     }
