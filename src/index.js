@@ -8,15 +8,15 @@ var host = {};
 host.BrowserHost = class {
 
     constructor() {
-        if (!window.ga) {
-            window.GoogleAnalyticsObject = 'ga';
-            window.ga = window.ga || function() {
-                window.ga.q = window.ga.q || [];
-                window.ga.q.push(arguments);
-            };
-            window.ga.l = 1 * new Date();
-        }
-        window.ga('create', 'UA-54146-13', 'auto');
+        // if (!window.ga) {
+        //     window.GoogleAnalyticsObject = 'ga';
+        //     window.ga = window.ga || function() {
+        //         window.ga.q = window.ga.q || [];
+        //         window.ga.q.push(arguments);
+        //     };
+        //     window.ga.l = 1 * new Date();
+        // }
+        // window.ga('create', 'UA-54146-13', 'auto');
 
         window.addEventListener('error', (e) => {
             this.exception(e.error, true);
@@ -249,48 +249,48 @@ host.BrowserHost = class {
     }
 
     exception(err, fatal) {
-        if (window.ga && this.version && this.version !== '0.0.0') {
-            var description = [];
-            description.push((err && err.name ? (err.name + ': ') : '') + (err && err.message ? err.message : '(null)'));
-            if (err.stack) {
-                var match = err.stack.match(/\n {4}at (.*)\((.*)\)/);
-                if (match) {
-                    description.push(match[1] + '(' + match[2].split('/').pop() + ')');
-                }
-                else {
-                    description.push(err.stack.split('\n').shift());
-                }
-            }
-            window.ga('send', 'exception', {
-                exDescription: description.join(' @ '),
-                exFatal: fatal,
-                appName: this.type,
-                appVersion: this.version
-            });
-        }
+        // if (window.ga && this.version && this.version !== '0.0.0') {
+        //     var description = [];
+        //     description.push((err && err.name ? (err.name + ': ') : '') + (err && err.message ? err.message : '(null)'));
+        //     if (err.stack) {
+        //         var match = err.stack.match(/\n {4}at (.*)\((.*)\)/);
+        //         if (match) {
+        //             description.push(match[1] + '(' + match[2].split('/').pop() + ')');
+        //         }
+        //         else {
+        //             description.push(err.stack.split('\n').shift());
+        //         }
+        //     }
+        //     window.ga('send', 'exception', {
+        //         exDescription: description.join(' @ '),
+        //         exFatal: fatal,
+        //         appName: this.type,
+        //         appVersion: this.version
+        //     });
+        // }
     }
 
     screen(name) {
-        if (window.ga && this.version && this.version !== '0.0.0') {
-            window.ga('send', 'screenview', {
-                screenName: name,
-                appName: this.type,
-                appVersion: this.version
-            });
-        }
+        // if (window.ga && this.version && this.version !== '0.0.0') {
+        //     window.ga('send', 'screenview', {
+        //         screenName: name,
+        //         appName: this.type,
+        //         appVersion: this.version
+        //     });
+        // }
     }
 
     event(category, action, label, value) {
-        if (window.ga && this.version && this.version !== '0.0.0') {
-            window.ga('send', 'event', {
-                eventCategory: category,
-                eventAction: action,
-                eventLabel: label,
-                eventValue: value,
-                appName: this.type,
-                appVersion: this.version
-            });
-        }
+        // if (window.ga && this.version && this.version !== '0.0.0') {
+        //     window.ga('send', 'event', {
+        //         eventCategory: category,
+        //         eventAction: action,
+        //         eventLabel: label,
+        //         eventValue: value,
+        //         appName: this.type,
+        //         appVersion: this.version
+        //     });
+        // }
     }
 
     _url(file) {
@@ -435,6 +435,22 @@ host.BrowserHost = class {
         }).then((buffer => {
             var context = new BrowserContext(this, '', file.name, buffer);
             return this._view.open(context).then((model) => {
+                var requiredops = this.document.getElementById('requiredops');
+                var nodes = model._graphs[0]._nodes;
+                var allops = []
+                nodes.map(x => {
+                    if(x._operator) {
+                        // TFLite and ONNX
+                        allops.push(x._operator)
+                    } else {
+                        // OpenVINO
+                        allops.push(x._type)
+                    }
+                }
+                );
+                var filteredops = new Set(allops);
+                var t = [...filteredops]
+                requiredops.innerHTML = t.join(' ');
                 return model;
             })
         }));
