@@ -435,22 +435,6 @@ host.BrowserHost = class {
         }).then((buffer => {
             var context = new BrowserContext(this, '', file.name, buffer);
             return this._view.open(context).then((model) => {
-                var requiredops = this.document.getElementById('requiredops');
-                var nodes = model._graphs[0]._nodes;
-                var allops = []
-                nodes.map(x => {
-                    if(x._operator) {
-                        // TFLite and ONNX
-                        allops.push(x._operator)
-                    } else {
-                        // OpenVINO
-                        allops.push(x._type)
-                    }
-                }
-                );
-                var filteredops = new Set(allops);
-                var t = [...filteredops]
-                requiredops.innerHTML = t.join(' ');
                 return model;
             })
         }));
@@ -743,3 +727,20 @@ class BrowserContext {
 }
 
 window.__view__ = new view.View(new host.BrowserHost());
+
+let toggleWebNN = (() => {
+    var tog = document.getElementById('tog');
+    var webnn = document.getElementById('webnn');
+    let togggleStatus = (() => {
+        if(tog.innerHTML == '[-] WebNN API Support Status') {
+            tog.innerHTML = '[+] WebNN API Support Status';
+            webnn.setAttribute('style', 'display: none');
+        } else {
+            tog.innerHTML = '[-] WebNN API Support Status';
+            webnn.setAttribute('style', 'display: block');
+        }
+    })
+    tog.addEventListener('click', togggleStatus, false);
+})
+
+document.addEventListener('DOMContentLoaded', toggleWebNN, false);
